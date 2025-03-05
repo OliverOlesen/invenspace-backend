@@ -1,0 +1,11 @@
+nelmio_cors:
+    defaults:
+        origin_regex: true
+        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']  # Ensure this env var is set to your frontend's origin
+        allow_credentials: true  # Allow credentials (cookies, authorization headers, etc.)
+        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        allow_headers: ['Content-Type', 'Authorization']
+        expose_headers: ['Link', 'Authorization']  # If you expose Authorization headers or any custom ones
+        max_age: 3600
+    paths:
+        '^/': ~  # Apply CORS rules globally

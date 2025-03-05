@@ -1,0 +1,54 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Form/'
+            - '../src/Kernel.php'
+            - '../src/Factory' # we never want to use all factories so we exclude it from auto loading
+
+    App\Factory\DataTableFactory:                                #register class we are pointing at as service
+        arguments:                                               #there is an argument in your constructor
+            $dataTables: !tagged data.table.interface #argument is called dataTables and i want you to fill it with everything
+            #that is tagged as a data.table.interface
+            $authorizationChecker: '@security.authorization_checker'
+
+    App\Factory\DataTableRepositoryFactory: #register class we are pointing at as service
+        arguments: #there is an argument in your constructor
+            $repositories: !tagged data.table.repository.interface #argument is called dataTables and i want you to fill it with everything
+            $em: '@doctrine.orm.entity_manager'
+            $security: '@security.helper'
+            #that is tagged as a data.table.repository.interface
+
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+        public: true
+
+    _instanceof: #everything that is instance of
+        App\Interface\DataTableInterface: #class your pointing at
+            tags: [ 'data.table.interface' ]  #tag you want your class to be marked as
+        App\Interface\DataTableRepositoryInterface: #class your pointing at
+            tags: [ 'data.table.repository.interface' ]  #tag you want your class to be marked as
+
+    App\Security\CustomLoginSuccessHandler:
+        arguments:
+            $jwtManager: '@lexik_jwt_authentication.jwt_manager'
+
+    App\Form\Users\UserEditType:
+        arguments:
+            $authorizationChecker: '@security.authorization_checker'

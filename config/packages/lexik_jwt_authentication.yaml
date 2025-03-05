@@ -1,0 +1,20 @@
+lexik_jwt_authentication:
+    api_platform:
+        check_path: /api/login
+        username_path: username
+        password_path: password
+
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+    token_ttl: 10800 #The jwt sent on login is valid for 3 hours.
+
+    token_extractors:
+        authorization_header:
+            enabled: true
+            prefix: Bearer
+        cookie:
+            enabled: true
+            name: token  # The name of your JWT cookie (token)
+        query_parameter:
+            enabled: false

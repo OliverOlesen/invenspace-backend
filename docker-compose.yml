@@ -1,0 +1,60 @@
+#docker-compose.yml
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/app
+    depends_on:
+      - web
+    networks:
+      - invenspace-backend
+  web:
+    build:
+      context: ./docker
+      dockerfile: php/Dockerfile
+    volumes:
+      - .:/app
+    networks:
+      - invenspace-backend
+    depends_on:
+      - mysql
+      - mailhog
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  mysql:
+    image: mariadb:10.4
+    container_name: invenspace-backend-db
+    ports:
+      - 3600:3306
+    volumes:
+      - database:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: invenspace
+      MYSQL_PASSWORD: secret_password
+      MYSQL_DATABASE: db
+    networks:
+      - invenspace-backend
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8000:80
+    networks:
+      - invenspace-backend
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - invenspace-backend
+
+networks:
+  invenspace-backend:
+volumes:
+  database:
